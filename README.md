@@ -18,3 +18,18 @@ https://spring.io/guides/gs/rest-service/
 Add home page: src/main/resources/static(or public)/index.html
 
 `@SpringBootApplication` is equal to `@Configuration`, `@EnableAutoConfiguration`, `@EnableWebMvc`, and `@ComponentScan`.  
+
+### Enabling hot swapping
+```
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+    <optional>true</optional>
+</dependency>
+```
+and this configuration in spring-boot-maven-plugin:
+```
+<configuration>
+    <addResources>true</addResources>
+</configuration>
+```
