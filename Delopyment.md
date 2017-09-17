@@ -71,6 +71,9 @@ In DNS provider's setting, add three A records:
 3. \*, public IP of the instance
 [Reference](https://www.namecheap.com/support/knowledgebase/article.aspx/319/2237/how-can-i-set-up-an-a-address-record-for-my-domain)
 
+## Set up a real SSL for HTTPS connections
+1. Get csr. A generator can be find [here](https://www.digicert.com/easy-csr/keytool.htm). You may also need some references [here](https://helpdesk.ssls.com/hc/en-us/articles/204299792-How-to-make-sure-domain-is-correct-in-the-CSR-). 
+
 
 ### Set JAVA_HOME (Why it't not set!)
 1. Find java location, usually `usr/lib/jvm/`. `java-1.8.0-openjdk-amd64` is simply the shortcut of `java-8-openjdk-amd64`, so we use the real path.
