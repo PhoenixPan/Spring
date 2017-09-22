@@ -1,7 +1,9 @@
-# MongoDB connection
+# MongoDB connection & manipulation
 
 ## Setup
-1. Create User object and UserRepository object. We need getters for fields to be included in GET responses.
+1. Create User object and UserRepository object. 
+    1. We need getters for fields to be included in GET responses.
+    2. Use `@Document(collection = "users")` if the collection name is different from the class name.
     ```java
     public class User {
       @Id private String id; // good practice to use @id
@@ -16,7 +18,7 @@
     @RepositoryRestResource //(collectionResourceRel = "users", path = "users") // routing path
     public interface UserRepository extends MongoRepository<User, String> {
       User findById(String id);
-      List<User> findByAccountBalanceGreaterThan(double balance); // explained in Get section
+      List<User> findByAccountBalanceGreaterThan(double balance); // explained in Read section
     }
     ```
 
@@ -27,7 +29,7 @@
 
 3. Now you should be about to visit `http://localhost:8080/users` and see the json response.   
 
-## Handle request
+## Handle basic CURD request
 ### Setup
 Create a controller to handle all related requests.
   ```java
@@ -40,40 +42,8 @@ Create a controller to handle all related requests.
      // request mapppings
   }
   ```
-  
-### Get
-#### Basic Get
-```java
-@RequestMapping("/all")
-public List<User> getAll() {
-  List<User> list = this.repository.findAll();
-  return list;
-}
-```
-#### Get with parameters
-```java
-@RequestMapping("/{id}")
-public User getById(@PathVariable("id") String id) {
-  User user = this.repository.findById(id);
-  return user;
-}
-```
-1. `findAll()` and `getById()`is implemented by Spring. Learn more about the naming conventions in the Query section.
-2. Use `@PathVariable` to read parameters.   
-3. Inexistent fields (created in Java Object but not in MongoDB) will be set to default value, i.e. for integer is 0.
 
-#### Get with pre-made queries 
-```
-@RequestMapping("/balance/{minBalance}")
-public List<User> getByAccountBalance(@PathVariable("minBalance") double balance) {
-  List<User> primeUsers = this.repository.findByAccountBalanceGreaterThan(balance);
-  return primeUsers;
-}
-```
-1. Allowed keywords for query methods can be found [here](https://docs.spring.io/spring-data/mongodb/docs/1.2.0.RELEASE/reference/html/mongo.repositories.html)
-
-
-### Add & Update
+### Create & Update
 ```java
   @PostMapping
   public void update(@RequestBody User user) {
@@ -103,7 +73,7 @@ public List<User> getByAccountBalance(@PathVariable("minBalance") double balance
 4. To create a new document, we could also use `insert()` with PUT request. 
     ```java
     @PutMapping
-    public void add(@RequestBody User user) {
+    public void create(@RequestBody User user) {
       this.repository.insert(user);
     }
     ```
@@ -115,3 +85,51 @@ public void delete(@PathVariable("id") String id) {
   this.repository.delete(id);
 }
 ```
+
+### Read
+#### Basic Read
+```java
+@RequestMapping("/all")
+public List<User> getAll() {
+  List<User> list = this.repository.findAll();
+  return list;
+}
+```
+#### Read with parameters
+```java
+@RequestMapping("/{id}")
+public User getById(@PathVariable("id") String id) {
+  User user = this.repository.findById(id);
+  return user;
+}
+```
+1. `findAll()` and `getById()`is implemented by Spring. Learn more about the naming conventions in the Query section.
+2. Use `@PathVariable` to read parameters.   
+3. Inexistent fields (created in Java Object but not in MongoDB) will be set to default value, i.e. for integer is 0.
+
+#### Read with pre-made queries 
+```
+@RequestMapping("/balance/{minBalance}")
+public List<User> getByAccountBalance(@PathVariable("minBalance") double balance) {
+  List<User> primeUsers = this.repository.findByAccountBalanceGreaterThan(balance);
+  return primeUsers;
+}
+```
+1. Provided functions (GreaterThan) for query methods can be found [here](https://docs.spring.io/spring-data/mongodb/docs/1.2.0.RELEASE/reference/html/mongo.repositories.html)
+2. No implementation required
+
+#### Read with self-defined queries
+In UserRepository
+```java
+@Query(value = "{address.city:?0}")
+List<User> findByCity(String city);
+```
+In controller
+```java
+@RequestMapping("/address/{city}")
+public List<User> getByCity(@PathVariable("city") String city) {
+List<User> cityUsers = this.repository.findByCity(city);
+return cityUsers;
+}
+```
+The value is case sensitive and will differentiate cases, for instance, to get `"city": "New York"`, we need url `/users/address/New%20York`. Yet this approach is not flexible enough.  
