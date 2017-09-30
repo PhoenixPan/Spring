@@ -38,7 +38,7 @@ public class UserAccount {
 }
 ```
 
-## Create controller to handle the request
+## Create a controller to handle the queries
 ```java
 @RestController
 @RequestMapping("/login")
@@ -55,24 +55,22 @@ public class UserAccountController {
     log.info("Verify: " + username + ", " + password);
     
     // use "?" to prevent SQL injection
-    String loginQuery = "SELECT * FROM user_account WHERE username = ? AND password = ?"; 
+    String findQuery = "SELECT * FROM user_account WHERE username = ? AND password = ?"; 
      
-    // 1. query() return a List<T>
+    // 1. query(PreparedStatementCreator, PreparedStatementSetter, ResultSetExtractor<T>) returns a List<T>
     // 2. parse the data returned to Java object, a corresponding constructor is required
-    List<UserAccount> user = jdbcTemplate.query(loginQuery,
-        new Object[] {username, password},
-        (rs, rowNum) ->
-            new UserAccount(rs.getString("username"), rs.getString("password")));
-    log.info("Is the credential correct? " + (user.size() > 0));
+    List<UserAccount> accounts = jdbcTemplate.query(findQuery, (rs, rowNum) ->
+        new UserAccount(rs.getString("username"), rs.getString("password")));
+    accounts.forEach(account -> log.info(account.toString()));
   }
 
-  @RequestMapping("/all")
+  @RequestMapping("/test")
   public void getAll() {
     log.info("All accounts:");
     String selectAllQuery = "SELECT * FROM user_account";
-    jdbcTemplate.query(selectAllQuery, (rs, rowNum) ->
-        new UserAccount(rs.getString("username"), rs.getString("password")))
-        .forEach(account -> log.info(account.toString()));
+    List<UserAccount> accounts = jdbcTemplate.query(selectAllQuery, (rs, rowNum) ->
+        new UserAccount(rs.getString("username"), rs.getString("password")));
+    accounts.forEach(account -> log.info(account.toString()));
   }
 }
 ```
