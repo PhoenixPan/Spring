@@ -1,4 +1,4 @@
-## Encrypt with hash and salt
+## Register: Encrypt with hash and salt
 
 Older implementations, such as SHAPasswordEncoder, would require a salt value when encoding the password.BCrypt, however, will internally generate a random salt instead. This is important to understand because it means that each call will have a different result, and so we need to only encode the password once and it **cannot be decrypted!**(that's why attackers have to use a dictionary to match)
 
@@ -22,7 +22,7 @@ Older implementations, such as SHAPasswordEncoder, would require a salt value wh
       String encoded = passwordEncoder.encode(password);
       String registerQuery = "INSERT INTO login (username, password) VALUES(?,?)";
       Object[] params = {username, encoded};
-      Object[] types = {Types.VARCHAR, Types.CHAR}; // not necessary
+      int[] types = {Types.VARCHAR, Types.CHAR}; // not necessary
       secondaryJdbcTemplate.update(registerQuery, params, types);
     }
     ```
@@ -38,3 +38,5 @@ Older implementations, such as SHAPasswordEncoder, would require a salt value wh
 ### References
 1. [Why should we choose bcrypt?](https://codahale.com/how-to-safely-store-a-password/)
 2. [为什么要在密码里加点“盐”](https://libuchao.com/2013/07/05/password-salt)
+
+## Login: authenticate the user by username and password
